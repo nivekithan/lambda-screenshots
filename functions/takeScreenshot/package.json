@@ -1,0 +1,24 @@
+{
+  "name": "take-screenshot",
+  "version": "1.0.0",
+  "description": "",
+  "types": "types.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.1",
+    "@types/aws-lambda": "^8.10.119",
+    "internal-types": "workspace:types@*"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.405.0",
+    "@sparticuz/chromium": "^116.0.0",
+    "puppeteer-core": "^21.1.1",
+    "zod": "^3.22.2"
+  },
+  "include": ["./types.ts"]
+}
