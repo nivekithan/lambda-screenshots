@@ -4,6 +4,7 @@ import chromium from "@sparticuz/chromium";
 import { takeScreenshot } from "./screenshot";
 import z from "zod";
 import { TakeScreenshotHandlerPayload } from "../types";
+import { PuppeteerScreenRecorder } from "puppeteer-screen-recorder";
 
 const localPathOfChromimum = "/etc/profiles/per-user/nivekithan/bin/chromium";
 
