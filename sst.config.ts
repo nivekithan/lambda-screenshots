@@ -36,7 +36,7 @@ export default {
 
         nodejs: {
           esbuild: {
-            external: ["@sparticuz/chromium"],
+            external: ["@sparticuz/chromium", "puppeteer-screen-recorder"],
           },
         },
 

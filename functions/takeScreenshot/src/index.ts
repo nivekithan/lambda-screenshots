@@ -1,9 +1,11 @@
 import { Handler } from "aws-lambda";
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { takeScreenshot } from "./screenshot";
+// import { takeScreenshot } from "./screenshot";
 import z from "zod";
 import { TakeScreenshotHandlerPayload } from "../types";
+import { takeScrollingScreenshot } from "./scrollingScreenshot";
+import { path as ffmepgPath } from "@ffmpeg-installer/ffmpeg";
 
 export const TakeScreenshotEventSchema = z.object({ url: z.string().url() });
 
@@ -21,7 +23,7 @@ export const main: Handler = async (
       headless: chromium.headless,
     });
 
-    const screenshotUrl = await takeScreenshot({ url }, browser);
+    const screenshotUrl = await takeScrollingScreenshot({ url, browser });
 
     const pages = await browser.pages();
 

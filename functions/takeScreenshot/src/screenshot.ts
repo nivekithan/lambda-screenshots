@@ -3,8 +3,6 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "./env";
 import crypto from "node:crypto";
 import { ScreenshotS3ObjMetadata } from "internal-types";
-import { PassThrough } from "node:stream";
-import { pipeline } from "node:stream/promises";
 
 export type ScreenshotParams = {
   url: string;
