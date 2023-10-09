@@ -4,7 +4,6 @@ import { env } from "./env";
 import crypto from "node:crypto";
 import { ScreenshotS3ObjMetadata } from "internal-types";
 import { PassThrough } from "node:stream";
-import { PuppeteerScreenRecorder } from "puppeteer-screen-recorder";
 import { pipeline } from "node:stream/promises";
 
 export type ScreenshotParams = {
@@ -13,51 +12,20 @@ export type ScreenshotParams = {
 
 export async function takeScreenshot(
   { url }: ScreenshotParams,
-  browser: Browser
+  browser: Browser,
 ) {
   const newPage = await browser.newPage();
 
-  const recorder = new PuppeteerScreenRecorder(newPage as any);
-
   await newPage.goto(url);
 
-  const passThroughStream = new PassThrough();
+  const screenshot = await newPage.screenshot({ encoding: "binary" });
 
-  setTimeout(async () => {
-    await recorder.stop();
-  });
+  const imageUrl = await saveScreenshot(screenshot, { url });
 
-  const videoUrl = await pipeline(passThroughStream, (stream) =>
-    saveScrollingScreenshot(stream, { url })
-  );
-
-  return videoUrl;
+  return imageUrl;
 }
 
-async function saveScrollingScreenshot(
-  stream: ReadableStream,
-  { url }: { url: string }
-) {
-  const s3Client = new S3Client();
-
-  const keyName = `${crypto.randomUUID()}.mp4`;
-
-  const putObjectCommand = new PutObjectCommand({
-    Bucket: env.BUCKET_NAME,
-    Key: keyName,
-    Body: stream,
-    Metadata: { url } satisfies ScreenshotS3ObjMetadata,
-    ContentType: "video/mp4	",
-  });
-
-  await s3Client.send(putObjectCommand);
-
-  const videoUrl = generatePublicUrlOfObject(keyName);
-
-  return videoUrl;
-}
-
-export async function saveScreenshot(buffer: Buffer, { url }: { url: string }) {
+async function saveScreenshot(image: Buffer, { url }: { url: string }) {
   const s3Client = new S3Client();
 
   const keyName = `${crypto.randomUUID()}.png`;
@@ -65,10 +33,8 @@ export async function saveScreenshot(buffer: Buffer, { url }: { url: string }) {
   const putObjectCommand = new PutObjectCommand({
     Bucket: env.BUCKET_NAME,
     Key: keyName,
-    Body: buffer,
-    Metadata: {
-      url,
-    } satisfies ScreenshotS3ObjMetadata,
+    Body: image,
+    Metadata: { url } satisfies ScreenshotS3ObjMetadata,
     ContentType: "image/png",
   });
 

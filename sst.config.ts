@@ -6,6 +6,7 @@ import { Bucket, ObjectOwnership } from "aws-cdk-lib/aws-s3";
 import { SiteEnv, TakeScreenshotEnv } from "./types/env";
 
 const region = "ap-south-1";
+
 export default {
   config(_input) {
     return {

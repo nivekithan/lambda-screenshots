@@ -4,14 +4,11 @@ import chromium from "@sparticuz/chromium";
 import { takeScreenshot } from "./screenshot";
 import z from "zod";
 import { TakeScreenshotHandlerPayload } from "../types";
-import { PuppeteerScreenRecorder } from "puppeteer-screen-recorder";
-
-const localPathOfChromimum = "/etc/profiles/per-user/nivekithan/bin/chromium";
 
 export const TakeScreenshotEventSchema = z.object({ url: z.string().url() });
 
 export const main: Handler = async (
-  event: unknown
+  event: unknown,
 ): Promise<TakeScreenshotHandlerPayload> => {
   try {
     console.log(event);
@@ -20,9 +17,7 @@ export const main: Handler = async (
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: process.env.IS_LOCAL
-        ? localPathOfChromimum
-        : await chromium.executablePath(),
+      executablePath: await chromium.executablePath(),
       headless: chromium.headless,
     });
 
