@@ -16,7 +16,7 @@ export async function takeScrollingScreenshot({
 }) {
   const page = await browser.newPage();
 
-  const recorder = new PuppeteerScreenRecorder(page as any);
+  const recorder = new PuppeteerScreenRecorder(page as any, { fps: 60 });
 
   await page.goto(url);
 
@@ -26,7 +26,11 @@ export async function takeScrollingScreenshot({
   const saveScreenshotPromise = saveScrollingScreenshot(videoStream, {
     url,
   });
-  await animate({ page, wait: 1000, distance: 500 });
+  await animate({
+    page,
+    wait: 400,
+    distance: 500,
+  });
   await recorder.stop();
 
   const videoUrl = await saveScreenshotPromise;
@@ -37,15 +41,27 @@ async function animate({
   page,
   distance,
   wait: waitTime,
+  querySelector,
 }: {
   page: Page;
   wait: number;
   distance: number;
+  querySelector?: string;
 }) {
-  const scrollHeight = await page.evaluate(() => {
-    const scrollHeight = document.body.scrollHeight;
-    return scrollHeight;
-  });
+  const scrollHeight = await page.evaluate(
+    ({ querySelector }: { querySelector?: string }) => {
+      const selectedElement = querySelector
+        ? document.querySelector(querySelector)
+        : null;
+      const element = selectedElement ? selectedElement : document.body;
+
+      const scrollHeight = element.scrollHeight;
+      return scrollHeight;
+    },
+    { querySelector },
+  );
+
+  console.log({ scrollHeight });
 
   const chunks = Math.ceil(scrollHeight / distance);
 
@@ -53,10 +69,15 @@ async function animate({
     await wait(waitTime);
     const newTop = (i + 1) * distance;
     await page.evaluate(
-      ({ top }: { top: number }) => {
-        window.scrollBy({ left: 0, top, behavior: "smooth" });
+      ({ top, querySelector }: { top: number; querySelector?: string }) => {
+        const seletedElement = querySelector
+          ? document.querySelector(querySelector)
+          : null;
+
+        const element = seletedElement ? seletedElement : window;
+        element.scrollBy({ left: 0, top, behavior: "smooth" });
       },
-      { top: newTop },
+      { top: newTop, querySelector },
     );
   }
 }
