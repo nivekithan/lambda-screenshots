@@ -26,35 +26,39 @@ export async function takeScrollingScreenshot({
   const saveScreenshotPromise = saveScrollingScreenshot(videoStream, {
     url,
   });
-  await animate(page);
+  await animate({ page, wait: 1000, distance: 500 });
   await recorder.stop();
 
   const videoUrl = await saveScreenshotPromise;
   return videoUrl;
 }
 
-async function animate(page: Page) {
-  await wait(500);
-  await page.evaluate(() => {
-    // @ts-expect-error
-    window.scrollBy({ top: 500, left: 0, behavior: "smooth" });
+async function animate({
+  page,
+  distance,
+  wait: waitTime,
+}: {
+  page: Page;
+  wait: number;
+  distance: number;
+}) {
+  const scrollHeight = await page.evaluate(() => {
+    const scrollHeight = document.body.scrollHeight;
+    return scrollHeight;
   });
-  await wait(500);
-  await page.evaluate(() => {
-    // @ts-expect-error
-    window.scrollBy({ top: 1000, left: 0, behavior: "smooth" });
-  });
-  await wait(500);
-  await page.evaluate(() => {
-    // @ts-expect-error
-    window.scrollBy({ top: 1500, left: 0, behavior: "smooth" });
-  });
-  await wait(500);
-  await page.evaluate(() => {
-    // @ts-expect-error
-    window.scrollBy({ top: 2000, left: 0, behavior: "smooth" });
-  });
-  await wait(1000);
+
+  const chunks = Math.ceil(scrollHeight / distance);
+
+  for (let i = 0; i < chunks; i++) {
+    await wait(waitTime);
+    const newTop = (i + 1) * distance;
+    await page.evaluate(
+      ({ top }: { top: number }) => {
+        window.scrollBy({ left: 0, top, behavior: "smooth" });
+      },
+      { top: newTop },
+    );
+  }
 }
 
 async function wait(ms: number) {
