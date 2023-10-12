@@ -33,7 +33,6 @@ export default {
         timeout: 2 * 60,
         layers: [layerChromium],
         url: true,
-
         nodejs: {
           esbuild: {
             external: ["@sparticuz/chromium", "puppeteer-screen-recorder"],

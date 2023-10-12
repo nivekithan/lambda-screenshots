@@ -1,4 +1,9 @@
-import { ActionArgs, V2_MetaFunction, json, redirect } from "@remix-run/node";
+import {
+  ActionFunctionArgs,
+  MetaFunction,
+  json,
+  redirect,
+} from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import { Field } from "~/components/form";
 import {
@@ -19,7 +24,7 @@ import {
   TakeScreenshotHandlerPayload,
 } from "take-screenshot";
 
-export const meta: V2_MetaFunction = () => {
+export const meta: MetaFunction = () => {
   return [
     { title: "Screenshot" },
     { name: "description", content: "Generate screenshot of any function" },
@@ -30,7 +35,7 @@ const CreateScreenshotSchema = z.object({
   url: z.string().url(),
 });
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
 
   const submission = parse(formData, { schema: CreateScreenshotSchema });

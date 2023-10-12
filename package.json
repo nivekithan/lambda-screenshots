@@ -9,9 +9,9 @@
   "license": "ISC",
   "devDependencies": {
     "@tsconfig/node18": "^18.2.1",
-    "aws-cdk-lib": "2.91.0",
+    "aws-cdk-lib": "2.95.1",
     "constructs": "10.2.69",
-    "sst": "^2.24.21"
+    "sst": "^2.28.6"
   },
   "scripts": {
     "dev": "sst dev",
