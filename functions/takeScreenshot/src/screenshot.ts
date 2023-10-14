@@ -44,7 +44,7 @@ async function saveScreenshot(image: Buffer, { url }: { url: string }) {
 }
 
 function generatePublicUrlOfObject(keyName: string) {
-  const objectUrl = `https://${env.BUCKET_NAME}.s3.${env.BUCKET_REGION_NAME}.amazonaws.com/${keyName}`;
+  const objectUrl = `https://${env.CLOUDFRONT_DISTRIBUTION}/${keyName}`;
 
   return objectUrl;
 }

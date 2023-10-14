@@ -5,6 +5,9 @@ export type TakeScreenshotEnv = {
 
   // AWS region in which s3 bucket is deployed;
   BUCKET_REGION_NAME: string;
+
+  // cloudfront distribution
+  CLOUDFRONT_DISTRIBUTION: string;
 };
 
 // Metadata for objects stored in Screenshot S3 bucket

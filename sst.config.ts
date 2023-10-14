@@ -4,6 +4,8 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Bucket, ObjectOwnership } from "aws-cdk-lib/aws-s3";
 import { SiteEnv, TakeScreenshotEnv } from "./types/env";
+import { CloudFrontToS3 } from "@aws-solutions-constructs/aws-cloudfront-s3";
+import { RemovalPolicy } from "aws-cdk-lib/core";
 
 const region = "ap-south-1";
 
@@ -22,8 +24,16 @@ export default {
 
       const screenshotBucket = new Bucket(stack, "screenshotBucket", {
         objectOwnership: ObjectOwnership.BUCKET_OWNER_ENFORCED,
-        publicReadAccess: true,
+        removalPolicy: RemovalPolicy.DESTROY,
       });
+
+      const cloudfrontDistribution = new CloudFrontToS3(
+        stack,
+        "screenshots-cloudfront",
+        {
+          existingBucketObj: screenshotBucket,
+        },
+      );
 
       const takeScreenshotFunction = new Function(stack, "takeScreenshot", {
         handler: "./functions/takeScreenshot/src/index.main",
@@ -49,6 +59,9 @@ export default {
         environment: {
           BUCKET_NAME: screenshotBucket.bucketName,
           BUCKET_REGION_NAME: region,
+          CLOUDFRONT_DISTRIBUTION:
+            cloudfrontDistribution.cloudFrontWebDistribution
+              .distributionDomainName,
         } satisfies TakeScreenshotEnv,
       });
 
@@ -69,6 +82,9 @@ export default {
       stack.addOutputs({
         siteUrl: remixSite.url,
         takeScreenshotUrl: takeScreenshotFunction.url,
+        cloudfrontUrl:
+          cloudfrontDistribution.cloudFrontWebDistribution
+            .distributionDomainName,
       });
     });
   },

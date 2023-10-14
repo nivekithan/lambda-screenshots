@@ -11,13 +11,12 @@
     "@tsconfig/node18": "^18.2.1",
     "aws-cdk-lib": "2.95.1",
     "constructs": "10.2.69",
-    "sst": "^2.29.2"
+    "sst": "^2.29.2",
+    "@aws-solutions-constructs/aws-cloudfront-s3": "^2.45.0",
+    "cdk-assets": "2.95.1"
   },
   "scripts": {
     "dev": "sst dev",
     "deploy": "sst deploy --stage prod"
-  },
-  "dependencies": {
-    "cdk-assets": "2.95.1"
   }
 }
