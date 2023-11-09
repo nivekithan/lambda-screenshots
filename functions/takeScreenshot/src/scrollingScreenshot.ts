@@ -6,6 +6,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import crpyto from "node:crypto";
 import { env } from "./env";
 import { ScreenshotS3ObjMetadata } from "internal-types";
+import bezier from "bezier-easing";
 
 export async function takeScrollingScreenshot({
   url,
@@ -16,7 +17,13 @@ export async function takeScrollingScreenshot({
 }) {
   const page = await browser.newPage();
 
-  const recorder = new PuppeteerScreenRecorder(page as any, { fps: 60 });
+  console.log("Creating recorder");
+  const recorder = new PuppeteerScreenRecorder(page as any, {
+    ffmpeg_Path: env.IS_LOCAL
+      ? "/home/nivekithan/.nix-profile/bin/ffmpeg"
+      : "/opt/bin/ffmpeg",
+  });
+  console.log("Created recorder");
 
   await page.goto(url);
 
@@ -28,10 +35,12 @@ export async function takeScrollingScreenshot({
   });
   await animate({
     page,
-    wait: 400,
-    distance: 500,
+    wait: 500,
+    distance: 1000,
+    scrollDuration: 1500,
   });
   await recorder.stop();
+  console.log("Finished recordiing");
 
   const videoUrl = await saveScreenshotPromise;
   return videoUrl;
@@ -42,11 +51,13 @@ async function animate({
   distance,
   wait: waitTime,
   querySelector,
+  scrollDuration,
 }: {
   page: Page;
   wait: number;
   distance: number;
   querySelector?: string;
+  scrollDuration: number;
 }) {
   const scrollHeight = await page.evaluate(
     ({ querySelector }: { querySelector?: string }) => {
@@ -67,18 +78,37 @@ async function animate({
 
   for (let i = 0; i < chunks; i++) {
     await wait(waitTime);
-    const newTop = (i + 1) * distance;
-    await page.evaluate(
-      ({ top, querySelector }: { top: number; querySelector?: string }) => {
-        const seletedElement = querySelector
-          ? document.querySelector(querySelector)
-          : null;
+    const scrollStartedAt = new Date().getTime();
+    const easing = bezier(0.23, 1.0, 0.32, 1.0);
 
-        const element = seletedElement ? seletedElement : window;
-        element.scrollBy({ left: 0, top, behavior: "smooth" });
-      },
-      { top: newTop, querySelector },
-    );
+    while (true) {
+      const timeNow = new Date().getTime();
+
+      if (timeNow - scrollStartedAt > scrollDuration) {
+        break;
+      }
+
+      const timeRatio = (timeNow - scrollStartedAt) / scrollDuration;
+      const newScrollBy = i * distance + distance * easing(timeRatio);
+
+      await page.evaluate(
+        ({
+          distance,
+          querySelector,
+        }: {
+          distance: number;
+          querySelector?: string;
+        }) => {
+          const seletedElement = querySelector
+            ? document.querySelector(querySelector)
+            : null;
+
+          const element = seletedElement ? seletedElement : window;
+          element.scroll({ left: 0, top: distance });
+        },
+        { distance: newScrollBy, querySelector },
+      );
+    }
   }
 }
 
@@ -106,6 +136,7 @@ async function saveScrollingScreenshot(
   });
 
   await parallelUpload.done();
+  console.log("Saved recording of screenshot");
 
   const videoUrl = generatePublicUrlOfObject(keyname);
 

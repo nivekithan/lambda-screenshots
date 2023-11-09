@@ -19,7 +19,7 @@ export function Field({
     <div className="flex flex-col gap-y-2">
       <Label htmlFor={id} {...labelProps} />
       <Input id={id} {...inputProps} name={name} />
-      <p className="text-sm text-destructive">{error}</p>
+      <p className="text-sm text-destructive-foreground">{error}</p>
     </div>
   );
 }

@@ -8,6 +8,8 @@ export type TakeScreenshotEnv = {
 
   // cloudfront distribution
   CLOUDFRONT_DISTRIBUTION: string;
+
+  IS_LOCAL?: boolean;
 };
 
 // Metadata for objects stored in Screenshot S3 bucket
